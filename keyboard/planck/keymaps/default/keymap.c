@@ -30,14 +30,14 @@ extern keymap_config_t keymap_config;
 #define LOWER M(_LOWER)
 #define RAISE M(_RAISE)
 #define M_BL 5
-#ifdef AUDIO_ENABLE
-  #define AUD_OFF M(6)
-  #define AUD_ON M(7)
-#endif
+#define AUD_OFF M(6)
+#define AUD_ON M(7)
 #define MUS_OFF M(8)
 #define MUS_ON M(9)
-#define PLOVER M(10)
-#define EXT_PLV M(11)
+#define VC_IN M(10)
+#define VC_DE M(11)
+#define PLOVER M(12)
+#define EXT_PLV M(13)
 
 // Fillers to make layering more clear
 #define _______ KC_TRNS
@@ -170,7 +170,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * |------+------+------+------+------+-------------+------+------+------+------+------|
  * |      |      |      |Aud on|Audoff|AGnorm|AGswap|Qwerty|Colemk|Dvorak|Plover|      |
  * |------+------+------+------+------+------|------+------+------+------+------+------|
- * |      |      |      |Mus on|Musoff|      |      |      |      |      |      |      |
+ * |      |Voice-|Voice+|Mus on|Musoff|      |      |      |      |      |      |      |
  * |------+------+------+------+------+------+------+------+------+------+------+------|
  * |      |      |      |      |      |             |      |      |      |      |      |
  * `-----------------------------------------------------------------------------------'
@@ -178,7 +178,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 [_ADJUST] = {
   {_______, RESET,   _______, _______, _______, _______, _______, _______, _______, _______, _______, KC_DEL},
   {_______, _______, _______, AUD_ON,  AUD_OFF, AG_NORM, AG_SWAP, QWERTY,  COLEMAK, DVORAK,  PLOVER,  _______},
-  {_______, _______, _______, MUS_ON,  MUS_OFF, _______, _______, _______, _______, _______, _______, _______},
+  {_______, VC_DE,   VC_IN,   MUS_ON,  MUS_OFF, _______, _______, _______, _______, _______, _______, _______},
   {_______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______}
 }
 
@@ -206,12 +206,11 @@ float tone_plover_gb[][2]  = SONG(PLOVER_GOODBYE_SOUND);
 
 float music_scale[][2] = SONG(MUSIC_SCALE_SOUND);
 float goodbye[][2] = SONG(GOODBYE_SOUND);
-
 #endif
 
 
 void persistant_default_layer_set(uint16_t default_layer) {
-  eeconfig_write_default_layer(default_layer);
+  eeconfig_update_default_layer(default_layer);
   default_layer_set(default_layer);
 }
 
@@ -304,21 +303,39 @@ const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt)
         case 10:
           if (record->event.pressed) {
             #ifdef AUDIO_ENABLE
+              voice_iterate();
+              PLAY_NOTE_ARRAY(music_scale, false, 0);
+            #endif
+          }
+        break;
+        case 11:
+          if (record->event.pressed) {
+            #ifdef AUDIO_ENABLE
+              voice_deiterate();
+              PLAY_NOTE_ARRAY(music_scale, false, 0);
+            #endif
+          }
+        break;
+        case 12:
+          if (record->event.pressed) {
+            #ifdef AUDIO_ENABLE
+              stop_all_notes();
               PLAY_NOTE_ARRAY(tone_plover, false, 0);
             #endif
             layer_off(_RAISE);
             layer_off(_LOWER);
             layer_off(_ADJUST);
+            layer_off(_MUSIC);
             layer_on(_PLOVER);
             if (!eeconfig_is_enabled()) {
                 eeconfig_init();
             }
             keymap_config.raw = eeconfig_read_keymap();
             keymap_config.nkro = 1;
-            eeconfig_write_keymap(keymap_config.raw);
+            eeconfig_update_keymap(keymap_config.raw);
           }
         break;
-        case 11:
+        case 13:
           if (record->event.pressed) {
             #ifdef AUDIO_ENABLE
               PLAY_NOTE_ARRAY(tone_plover_gb, false, 0);
@@ -331,8 +348,22 @@ const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt)
     return MACRO_NONE;
 };
 
+void matrix_init_user(void) {
+  #ifdef AUDIO_ENABLE
+    _delay_ms(20); // stops the tick
+    PLAY_NOTE_ARRAY(tone_startup, false, 0);
+  #endif
+}
+
+#ifdef AUDIO_ENABLE
+void play_goodbye_tone()
+{
+  PLAY_NOTE_ARRAY(goodbye, false, 0);
+  _delay_ms(150);
+}
+
 uint8_t starting_note = 0x0C;
-int offset = 7;
+int offset = 0;
 
 void process_action_user(keyrecord_t *record) {
 
@@ -345,16 +376,4 @@ void process_action_user(keyrecord_t *record) {
   }
 
 }
-
-void matrix_init_user(void) {
-  #ifdef AUDIO_ENABLE
-    _delay_ms(10); // stops the tick
-    PLAY_NOTE_ARRAY(tone_startup, false, 0);
-  #endif
-}
-
-void play_goodbye_tone()
-{
-  PLAY_NOTE_ARRAY(goodbye, false, 0);
-  _delay_ms(150);
-}
+#endif

@@ -3,7 +3,6 @@
 #include "eeconfig.h"
 #ifdef AUDIO_ENABLE
   #include "audio.h"
-  #include "song_list.h"
 #endif
 
 // Each layer gets a name for readability, which is then used in the keymap matrix below.
@@ -25,12 +24,12 @@
 #define LOWER M(_LOWER)
 #define RAISE M(_RAISE)
 #define M_BL 5
-#ifdef AUDIO_ENABLE
-  #define AUD_OFF M(6)
-  #define AUD_ON M(7)
-#endif
+#define AUD_OFF M(6)
+#define AUD_ON M(7)
 #define MUS_OFF M(8)
 #define MUS_ON M(9)
+#define VC_IN M(10)
+#define VC_DE M(11)
 
 // Fillers to make layering more clear
 #define _______ KC_TRNS
@@ -162,7 +161,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * |------+------+------+------+------+-------------+------+------+------+------+------|
  * |      |      |      |Audoff|Aud on|AGnorm|AGswap|Qwerty|Colemk|Dvorak|      |      |
  * |------+------+------+------+------+------|------+------+------+------+------+------|
- * |      |      |      |Musoff|Mus on|      |      |      |      |      |      |      |
+ * |      |Voice-|Voice+|Musoff|Mus on|      |      |      |      |      |      |      |
  * |------+------+------+------+------+------+------+------+------+------+------+------|
  * |      |      |      |      |      |             |      |      |      |      |      |
  * `-----------------------------------------------------------------------------------'
@@ -171,7 +170,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   {KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12},
   {_______, RESET,   _______, _______, _______, _______, _______, _______, _______, _______, _______, KC_DEL},
   {_______, _______, _______, AUD_ON,  AUD_OFF, AG_NORM, AG_SWAP,  QWERTY, COLEMAK, DVORAK,  _______, _______},
-  {_______, _______, _______, MUS_ON,  MUS_OFF, _______, _______, _______, _______, _______, _______, _______},
+  {_______, VC_DE,   VC_IN,   MUS_ON,  MUS_OFF, _______, _______, _______, _______, _______, _______, _______},
   {_______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______}
 }
 
@@ -199,7 +198,7 @@ float goodbye[][2] = SONG(GOODBYE_SOUND);
 #endif
 
 void persistant_default_layer_set(uint16_t default_layer) {
-  eeconfig_write_default_layer(default_layer);
+  eeconfig_update_default_layer(default_layer);
   default_layer_set(default_layer);
 }
 
@@ -289,12 +288,38 @@ const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt)
             #endif
           }
         break;
+        case 10:
+          if (record->event.pressed) {
+            #ifdef AUDIO_ENABLE
+              voice_iterate();
+              PLAY_NOTE_ARRAY(music_scale, false, 0);
+            #endif
+          }
+        break;
+        case 11:
+          if (record->event.pressed) {
+            #ifdef AUDIO_ENABLE
+              voice_deiterate();
+              PLAY_NOTE_ARRAY(music_scale, false, 0);
+            #endif
+          }
+        break;
       }
     return MACRO_NONE;
 };
 
+
+void matrix_init_user(void) {
+  #ifdef AUDIO_ENABLE
+    _delay_ms(20); // gets rid of tick
+    PLAY_NOTE_ARRAY(start_up, false, 0);
+  #endif
+}
+
+#ifdef AUDIO_ENABLE
+
 uint8_t starting_note = 0x0C;
-int offset = 7;
+int offset = 0;
 
 void process_action_user(keyrecord_t *record) {
 
@@ -308,18 +333,10 @@ void process_action_user(keyrecord_t *record) {
 
 }
 
-void matrix_init_user(void) {
-  _delay_ms(10); // gets rid of tick
-  play_startup_tone();
-}
-
-void play_startup_tone()
-{
-  PLAY_NOTE_ARRAY(start_up, false, 0);
-}
-
 void play_goodbye_tone()
 {
   PLAY_NOTE_ARRAY(goodbye, false, 0);
   _delay_ms(150);
 }
+
+#endif
