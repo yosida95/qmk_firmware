@@ -26,8 +26,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                                        | Prev | Next |         | HOME |  END |
  *                                 ,------|------|------|         |------+------+------.
  *                                 |      |      | PgUp |         | PgDn |      |      |
- *                                 | Space| Enter|------|         |------| Back | Space|
- *                                 |      |      |  [   |         |  ]   | Space|      |
+ *                                 | Space| Back |------|         |------| Enter| Space|
+ *                                 |      | Space|  [   |         |  ]   |      |      |
  *                                 `--------------------'         `--------------------'
  */
 // If it accepts an argument (i.e, is a function), it doesn't need KC_.
@@ -39,9 +39,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_LCTRL,KC_A,   KC_S,   KC_D,   KC_F,   KC_G,
         KC_LSFT, KC_Z,   KC_X,   KC_C,   KC_V,   KC_B,KC_LGUI,
         KC_LALT, KC_MUTE,KC_VOLD,KC_VOLU,KC_MPLY,
-                                                 KC_MPRV,KC_MNXT,
-                                                         KC_PGUP,
-                                        KC_SPACE,KC_ENT, KC_LBRC,
+                                                 KC_MPRV,  KC_MNXT,
+                                                           KC_PGUP,
+                                        KC_SPACE,KC_BSPACE,KC_LBRC,
 
         // right hand
         KC_ESC,        KC_6,KC_7,   KC_8,   KC_9,  KC_0,   KC_EQL,
@@ -51,7 +51,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                             KC_LEFT,KC_DOWN,KC_UP, KC_RGHT,MT(MOD_RALT,KC_GRV),
         KC_HOME,KC_END,
         KC_PGDN,
-        KC_RBRC,KC_BSPACE,KC_SPACE
+        KC_RBRC,KC_ENT,KC_SPACE
     ),
 /* Keymap 1: Symbol Layer
  *

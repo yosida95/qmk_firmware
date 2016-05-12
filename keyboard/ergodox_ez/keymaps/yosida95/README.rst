@@ -20,8 +20,8 @@ An awasome keymap specialized for yosida95
     *                                        | Prev | Next |         | HOME |  END |
     *                                 ,------|------|------|         |------+------+------.
     *                                 |      |      | PgUp |         | PgDn |      |      |
-    *                                 | Space| Enter|------|         |------| Back | Space|
-    *                                 |      |      |  [   |         |  ]   | Space|      |
+    *                                 | Space| Back |------|         |------| Enter| Space|
+    *                                 |      | Space|  [   |         |  ]   |      |      |
     *                                 `--------------------'         `--------------------'
     */
    /* Keymap 1: Symbol Layer
